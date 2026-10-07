@@ -1,0 +1,65 @@
+name: Homebrew
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: homebrew-${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+env:
+  HOMEBREW_NO_ANALYTICS: "1"
+  HOMEBREW_NO_INSTALL_CLEANUP: "1"
+  HOMEBREW_NO_INSTALL_UPGRADE: "1"
+  HOMEBREW_NO_INSTALLED_DEPENDENTS_CHECK: "1"
+
+jobs:
+  formula:
+    name: Apple Silicon macOS
+    runs-on: macos-26
+    timeout-minutes: 45
+    steps:
+      - name: Set up Homebrew and check out the tap
+        uses: Homebrew/actions/setup-homebrew@1e34f2e2acaa766b7efacb8c26352e6abbb023f9 # 2026.09.13.1
+        with:
+          stable: true
+
+      - name: Trust only this formula
+        run: brew trust --formula hitheoai/tap/polaris
+
+      - name: Check formula style
+        run: brew style "$(brew --repository hitheoai/tap)/Formula/polaris.rb"
+
+      - name: Audit the formula
+        run: brew audit --strict --online --formula hitheoai/tap/polaris
+
+      - name: Build from the published source and test
+        run: |
+          brew install --build-from-source hitheoai/tap/polaris
+          brew test hitheoai/tap/polaris
+
+      - name: Reinstall and test again
+        run: |
+          brew reinstall --build-from-source hitheoai/tap/polaris
+          brew test hitheoai/tap/polaris
+
+      - name: Check installed command links
+        run: |
+          test "$(command -v polaris)" = "$(brew --prefix)/bin/polaris"
+          test "$(command -v theo)" = "$(brew --prefix)/bin/theo"
+          polaris --version
+          theo --version
+
+      - name: Check uninstall removes only the package commands
+        run: |
+          brew uninstall hitheoai/tap/polaris
+          test ! -e "$(brew --prefix)/bin/polaris"
+          test ! -L "$(brew --prefix)/bin/polaris"
+          test ! -e "$(brew --prefix)/bin/theo"
+          test ! -L "$(brew --prefix)/bin/theo"
