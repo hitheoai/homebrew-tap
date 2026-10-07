@@ -3,11 +3,12 @@
 Homebrew packaging for [Polaris](https://github.com/hitheoai/polaris), the local
 security checker for code and AI coding agents.
 
-**Release status:** prepared locally; not yet published or verified by hosted CI.
-The public installation command below becomes available only after publication.
-Source installation, reinstall, functional tests, and uninstall passed in an
-isolated custom Homebrew prefix on Apple Silicon macOS 26.6. That establishes
-local package mechanics, not standard-prefix or clean hosted-runner acceptance.
+**Validated release:** Polaris 0.6.0. Source installation, functional tests,
+reinstall, and uninstall passed on a clean Apple Silicon macOS 26 runner using the
+standard `/opt/homebrew` prefix. See the
+[hosted validation run](https://github.com/hitheoai/homebrew-tap/actions/runs/37625081181).
+The same lifecycle also passed locally in an isolated custom prefix on macOS 26.6.
+Every change must pass the required Homebrew check before it can merge into `main`.
 
 ## Install
 
